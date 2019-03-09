@@ -17,7 +17,10 @@
 package com.github.goldsam.axonframework.extensions.aws.eventhandling;
 
 import java.util.Optional;
+
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
+import com.amazonaws.services.kinesis.model.Record;
+
 import org.axonframework.eventhandling.EventMessage;
 
 /**
@@ -28,8 +31,21 @@ import org.axonframework.eventhandling.EventMessage;
  */
 public interface KinesisMessageConverter {
 
-    PutRecordsRequestEntry CreatePutRecordsRequestEntry(EventMessage<?> eventMessage);
-    //Optional<EventMessage<?>> read
-
-    com.amazonaws.services.kinesis.model.GetRecordsRequest
+    /**
+     * Creates an {@link com.amazonaws.services.kinesis.model.PutRecordsRequestEntry} from a given {@code eventMessage}.
+     * 
+     * @param eventMessage The event message to create the Kenisis {@link PutRecordsRequestEntry} from.
+     * @return an {@link com.amazonaws.services.kinesis.model.PutRecordsRequestEntry} which can be 
+     *         published to a Kinesis Stream by a "put" operation.
+     */
+    PutRecordsRequestEntry createPutRecordsRequestEntry(EventMessage<?> eventMessage);
+   
+    /**
+     * Reconstructs an {@link EventMessage} from a given {@code record}.
+     * 
+     * @param record a {@link com.amazonaws.services.kinesis.model.Record} read from an Kenesis Stream by a "get" operation.
+     * @return The event message to publish on the local event procoessors.res
+     */
+    Optional<EventMessage<?>> readRecord(Record record);
 }
+ 
