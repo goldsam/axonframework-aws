@@ -20,14 +20,12 @@ import org.axonframework.eventhandling.DomainEventMessage;
 import org.axonframework.eventhandling.EventMessage;
 
 /**
- * {@link PartitionKeyResolver} implementation that returns the identifier of the aggregate 
- * that generated the event if the {@code eventMessage} implements the {@link DomainEventMessage} 
- * interface; otherwise, the package name of the Message's payload is returned. This intent of 
- * this strategy is for all events for a specific aggregate root to be processed through a 
- * common Kinesis Stream Shard which provides a total ordering over events for any single aggregate.
- * 
- * @author Sam Goldmann
- * @since 1.0
+ * {@link PartitionKeyResolver} implementation that returns the identifier of the 
+ * aggregate that generated the event if the {@code eventMessage} implements the 
+ * {@link DomainEventMessage} interface; otherwise, the package name of the Message 
+ * payload is returned. The intent of this strategy is for all events for a specific 
+ * aggregate root to be processed through a common Kinesis Stream Shard. This ensures
+ * events are processed in their correct order.
  */
 public class AggregateIdentifierPartitionKeyResolver implements PartitionKeyResolver {
 

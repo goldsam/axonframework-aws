@@ -16,25 +16,20 @@
 
 package com.github.goldsam.axonframework.extensions.aws.eventhandling;
 
-import java.util.Optional;
-
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
 import com.amazonaws.services.kinesis.model.Record;
-
+import java.util.Optional;
 import org.axonframework.eventhandling.EventMessage;
 
 /**
  * Interface for converting Kinsis Stream Records to and from Axon Messages.
- *
- * @author Sam Goldmann
- * @since 1.0
  */
 public interface KinesisMessageConverter {
 
     /**
      * Creates an {@link com.amazonaws.services.kinesis.model.PutRecordsRequestEntry} from a given {@code eventMessage}.
      * 
-     * @param eventMessage The event message to create the Kenisis {@link PutRecordsRequestEntry} from.
+     * @param eventMessage The event message data to create the Kenisis {@link PutRecordsRequestEntry} from.
      * @return an {@link com.amazonaws.services.kinesis.model.PutRecordsRequestEntry} which can be 
      *         published to a Kinesis Stream by a "put" operation.
      */

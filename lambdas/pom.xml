@@ -23,41 +23,49 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>axon-aws</artifactId>
+    <artifactId>axon-aws-lambdas</artifactId>
 
-    <name>Axon Framework AWS Extension - Kinesis</name>
-    <description>This module contains implementations of several components, connecting them to an AWS Kinesis stream</description>
+    <name>Axon Framework Amazon AWS Extension - Lamba Functions</name>
+    <description>Deployable Lambas supporting the AWS Event Store</description>
 
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- <dependency>
-            <groupId>org.axonframework</groupId>
-            <artifactId>axon-messaging</artifactId>
-            <version>${axon.version}</version>
-        </dependency> -->
-
         <dependency>
-            <groupId>org.axonframework</groupId>
-            <artifactId>axon-eventsourcing</artifactId>
-            <version>${axon.version}</version>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-core</artifactId>
+            <version>1.1.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>amazon-kinesis-client</artifactId>
-            <version>${amazon-kinesis-client.version}</version>
+            <artifactId>aws-lambda-java-events</artifactId>
+            <version>1.1.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-dynamodb</artifactId>
-            <version>${aws-java-sdk-dynamodb.version}</version>
-        </dependency>
-
     </dependencies>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <!-- <build>
         <plugins>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -70,9 +78,5 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>
+    </build> -->
 </project>
-
-
-
-

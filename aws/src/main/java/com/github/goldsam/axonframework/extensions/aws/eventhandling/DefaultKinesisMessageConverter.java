@@ -16,22 +16,22 @@
 
 package com.github.goldsam.axonframework.extensions.aws.eventhandling;
 
-import org.axonframework.serialization.SerializedObject;
+import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
+import com.amazonaws.services.kinesis.model.Record;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Optional;
+import org.axonframework.eventhandling.EventMessage;
+import org.axonframework.messaging.EventPublicationFailedException;
 import org.axonframework.serialization.Serializer;
 import static org.axonframework.common.BuilderUtils.assertNonNull;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
-import java.util.Optional;
-
-import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
-import com.amazonaws.services.kinesis.model.Record;
-
-import org.apache.http.util.ByteArrayBuffer;
-import org.axonframework.eventhandling.EventMessage;
-
 /**
- * DefaultKinesisMessageConverter
+ * Default {@link KinesisMessageConverter} implementation.
  */
 public class DefaultKinesisMessageConverter implements KinesisMessageConverter {
 
@@ -59,62 +59,35 @@ public class DefaultKinesisMessageConverter implements KinesisMessageConverter {
 
     @Override
     public PutRecordsRequestEntry createPutRecordsRequestEntry(EventMessage<?> eventMessage) {
-
-        ByteArrayOutputStream stream =
-
-        SerializedObject<byte[]> serializedObject = eventMessage.serializePayload(serializer, byte[].class);
-        String routingKey = partitionKeyResolver.resolvePartitionKey(eventMessage);
-
-
-        // AMQP.BasicProperties.Builder properties = new AMQP.BasicProperties.Builder();
-        // Map<String, Object> headers = new HashMap<>();
-        // eventMessage.getMetaData().forEach((k, v) -> headers.put(Headers.MESSAGE_METADATA + "-" + k, v));
-        // Headers.defaultHeaders(eventMessage, serializedObject).forEach((k, v) -> {
-        //     if (k.equals(MESSAGE_TIMESTAMP)) {
-        //         headers.put(k, formatInstant(eventMessage.getTimestamp()));
-        //     } else {
-        //         headers.put(k, v);
-        //     }
-        // });
-        // properties.headers(headers);
-        
+        byte[] body = asByteArray(eventMessage);
+        String partitionKey = partitionKeyResolver.resolvePartitionKey(eventMessage);
         return new PutRecordsRequestEntry()
-            .withData(ByteBuffer.wrap(serializedObject.getData()));
-            
-        
-        //    (serializedObject.getData(), routingKey, properties.build(), false, false);
-        
+            .withData(ByteBuffer.wrap(body))
+            .withPartitionKey(partitionKey);
     }
 
     @Override
     public Optional<EventMessage<?>> readRecord(Record record) {
-        if (!headers.keySet().containsAll(Arrays.asList(Headers.MESSAGE_ID, Headers.MESSAGE_TYPE))) {
-            return Optional.empty();
+        try {
+            byte[] messageBody = record.getData().array();
+            EventMessageReader in = new EventMessageReader(new DataInputStream(new ByteArrayInputStream(messageBody)),
+                                                           serializer);
+            return Optional.of(in.readEventMessage());
+        } catch (IOException e) {
+            // ByteArrayInputStream doesn't throw IOException... anyway...
+            throw new EventPublicationFailedException("Failed to deserialize an EventMessage", e);
         }
-        Map<String, Object> metaData = new HashMap<>();
-        headers.forEach((k, v) -> {
-            if (k.startsWith(Headers.MESSAGE_METADATA + "-")) {
-                metaData.put(k.substring((Headers.MESSAGE_METADATA + "-").length()), v);
-            }
-        });
-        SimpleSerializedObject<byte[]> serializedMessage = new SimpleSerializedObject<>(
-                messageBody, byte[].class,
-                Objects.toString(headers.get(Headers.MESSAGE_TYPE)),
-                Objects.toString(headers.get(Headers.MESSAGE_REVISION), null)
-        );
-        SerializedMessage<?> message = new SerializedMessage<>(
-                Objects.toString(headers.get(Headers.MESSAGE_ID)),
-                new LazyDeserializingObject<>(serializedMessage, serializer),
-                new LazyDeserializingObject<>(MetaData.from(metaData))
-        );
-        String timestamp = Objects.toString(headers.get(MESSAGE_TIMESTAMP));
-        if (headers.containsKey(Headers.AGGREGATE_ID)) {
-            return Optional.of(new GenericDomainEventMessage<>(Objects.toString(headers.get(Headers.AGGREGATE_TYPE)),
-                                                               Objects.toString(headers.get(Headers.AGGREGATE_ID)),
-                                                               (Long) headers.get(Headers.AGGREGATE_SEQ),
-                                                               message, () -> DateTimeUtils.parseInstant(timestamp)));
-        } else {
-            return Optional.of(new GenericEventMessage<>(message, () -> DateTimeUtils.parseInstant(timestamp)));
+    }
+
+    private byte[] asByteArray(EventMessage<?> event) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            EventMessageWriter writer = new EventMessageWriter(new DataOutputStream(baos));
+            writer.writeEventMessage(event, serializer);
+            return baos.toByteArray();
+        } catch (IOException e) {
+            // ByteArrayOutputStream doesn't throw IOException... anyway...
+            throw new EventPublicationFailedException("Failed to serialize an EventMessage", e);
         }
     }
 

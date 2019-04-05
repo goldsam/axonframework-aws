@@ -20,10 +20,7 @@ import org.axonframework.eventhandling.EventMessage;
 
 /**
  * Provides the Kinesis Stream Partition Key used when sending a given EventMessage. 
- * The paritition key determines which Kinesis Stream Shard will receive the event message. 
- *
- * @author Sam Goldmann
- * @since 1.0
+ * The partition key determines which Kinesis Stream Shard will receive the event message. 
  */
 @FunctionalInterface
 public interface PartitionKeyResolver {
@@ -35,4 +32,5 @@ public interface PartitionKeyResolver {
      * @return the partition key for the event message
      */
     String resolvePartitionKey(EventMessage<?> eventMessage);
+
 }

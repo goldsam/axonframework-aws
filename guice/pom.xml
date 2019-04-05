@@ -23,38 +23,25 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>axon-aws</artifactId>
+    <artifactId>axon-aws-guice</artifactId>
 
-    <name>Axon Framework AWS Extension - Kinesis</name>
-    <description>This module contains implementations of several components, connecting them to an AWS Kinesis stream</description>
+    <name>Axon Framework AWS Extension - Guice</name>
+    <description>Guice Dependency Injection module for the Amazon AWS Extension for Axon Framework</description>
 
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- <dependency>
-            <groupId>org.axonframework</groupId>
-            <artifactId>axon-messaging</artifactId>
-            <version>${axon.version}</version>
-        </dependency> -->
-
         <dependency>
-            <groupId>org.axonframework</groupId>
-            <artifactId>axon-eventsourcing</artifactId>
-            <version>${axon.version}</version>
+            <groupId>com.github.goldsam.axonframework.extensions.aws</groupId>
+            <artifactId>axon-aws</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>amazon-kinesis-client</artifactId>
-            <version>${amazon-kinesis-client.version}</version>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>${guice.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-dynamodb</artifactId>
-            <version>${aws-java-sdk-dynamodb.version}</version>
-        </dependency>
-
     </dependencies>
 
     <build>
