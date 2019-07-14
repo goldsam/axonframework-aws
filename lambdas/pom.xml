@@ -19,13 +19,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.github.goldsam.axonframework.extensions.aws</groupId>
-        <artifactId>axon-aws-parent</artifactId>
+        <artifactId>axonframework-aws-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>axon-aws-lambdas</artifactId>
+    <artifactId>axonframework-aws-lambdas</artifactId>
 
-    <name>Axon Framework Amazon AWS Extension - Lamba Functions</name>
+    <name>Axon Framework AWS Extension - Lamba Functions</name>
     <description>Deployable Lambas supporting the AWS Event Store</description>
 
     <packaging>jar</packaging>

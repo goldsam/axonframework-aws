@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.commit;
+package com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.recordpercommit;
 
 /**
  * Configuration for a DynamoDb event store entry that contains an array of 

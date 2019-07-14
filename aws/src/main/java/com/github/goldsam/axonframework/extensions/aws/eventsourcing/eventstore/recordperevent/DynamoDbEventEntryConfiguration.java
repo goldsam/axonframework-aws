@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.event;
+package com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.recordperevent;
 
 /**
  */

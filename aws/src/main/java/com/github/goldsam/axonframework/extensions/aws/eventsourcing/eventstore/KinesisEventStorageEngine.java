@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.model.PutRecordsRequest;
-import com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.commit.PutRequestPerCommitStorageStrategy;
+import com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.recordpercommit.RecordPerCommitStorageStrategy;
 
 import static org.axonframework.common.BuilderUtils.assertNonNull;
 
@@ -48,7 +48,7 @@ import static org.axonframework.common.BuilderUtils.assertNonNull;
 public class KinesisEventStorageEngine extends BatchingEventStorageEngine {
 
     private final AmazonKinesis kinesisClient;
-    private final KinesisEventStorageStrategy storageStrategy;
+    private final KinesisStorageStrategy storageStrategy;
 
     /**
      * Instantiate a {@link MongoEventStorageEngine} based on the fields contained in the {@link Builder}.
@@ -75,7 +75,7 @@ public class KinesisEventStorageEngine extends BatchingEventStorageEngine {
      * <li>The event Serializer defaults to a {@link org.axonframework.serialization.xml.XStreamSerializer}.</li>
      * <li>The {@code snapshotFilter} defaults to a {@link Predicate} which returns {@code true} regardless.</li>
      * <li>The {@code batchSize} defaults to an integer of size {@code 100}.</li>
-     * <li>The {@link KinesisEventStorageStrategy} defaults to a {@link PutRequestPerCommitStorageStrategy}.</li>
+     * <li>The {@link KinesisStorageStrategy} defaults to a {@link RecordPerCommitStorageStrategy}.</li>
      * </ul>
      * <p>
      *
@@ -100,8 +100,7 @@ public class KinesisEventStorageEngine extends BatchingEventStorageEngine {
     protected void appendEvents(List<? extends EventMessage<?>> events, Serializer serializer) {
         if (!events.isEmpty()) {
             try {
-                PutRecordsRequest putRecordsRequest = storageStrategy.createPutRecordsRequest(events, serializer);
-                kinesisClient.putRecords(putRecordsRequest);
+                storageStrategy.appendEvents(kinesisClient, events, serializer);
             } catch (Exception e) {
                 handlePersistenceException(e, events.get(0));
             }
@@ -173,7 +172,7 @@ public class KinesisEventStorageEngine extends BatchingEventStorageEngine {
      * <li>The event Serializer defaults to a {@link org.axonframework.serialization.xml.XStreamSerializer}.</li>
      * <li>The {@code snapshotFilter} defaults to a {@link Predicate} which returns {@code true} regardless.</li>
      * <li>The {@code batchSize} defaults to an integer of size {@code 100}.</li>
-     * <li>The {@link KinesisEventStorageStrategy} defaults to a {@link PutRequestPerCommitStorageStrategy}.</li>
+     * <li>The {@link KinesisStorageStrategy} defaults to a {@link RecordPerCommitStorageStrategy}.</li>
      * </ul>
      * <p>
      */
@@ -181,7 +180,7 @@ public class KinesisEventStorageEngine extends BatchingEventStorageEngine {
 
         private AmazonKinesis kinesisClient;
          
-        private KinesisEventStorageStrategy storageStrategy = new PutRequestPerCommitStorageStrategy();
+        private KinesisStorageStrategy storageStrategy = new RecordPerCommitStorageStrategy();
 
         private Builder() {
         }
@@ -229,15 +228,15 @@ public class KinesisEventStorageEngine extends BatchingEventStorageEngine {
         }
 
         /**
-         * Sets the {@link KinesisEventStorageStrategy} specifying how to store and retrieve events and snapshots from the
+         * Sets the {@link KinesisStorageStrategy} specifying how to store and retrieve events and snapshots from the
          * collections. Defaults to a {@link DocumentPerEventStorageStrategy}, causing every event and snapshot to be
          * stored in a separate Mongo Document.
          *
-         * @param storageStrategy the {@link KinesisEventStorageStrategy} specifying how to store and retrieve events and snapshots
+         * @param storageStrategy the {@link KinesisStorageStrategy} specifying how to store and retrieve events and snapshots
          *                        from the collections
          * @return the current Builder instance, for fluent interfacing
          */
-        public Builder storageStrategy(KinesisEventStorageStrategy storageStrategy) {
+        public Builder storageStrategy(KinesisStorageStrategy storageStrategy) {
             assertNonNull(storageStrategy, "storageStrategy may not be null");
             this.storageStrategy = storageStrategy;
             return this;

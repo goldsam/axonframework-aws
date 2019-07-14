@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.commit;
+package com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.recordpercommit;
 
 import org.axonframework.eventhandling.DomainEventMessage;
 import org.axonframework.serialization.Serializer;
@@ -27,8 +27,8 @@ import java.util.List;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.github.goldsam.axonframework.extensions.aws.eventhandling.EventMessageWriter;
-import com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.event.DynamoDbEventEntryConfiguration;
-import com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.event.EventEntry;
+import com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.recordperevent.DynamoDbEventEntryConfiguration;
+import com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.recordperevent.EventEntry;
 
 import static org.axonframework.common.DateTimeUtils.formatInstant;
 

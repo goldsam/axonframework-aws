@@ -19,11 +19,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.github.goldsam.axonframework.extensions.aws</groupId>
-        <artifactId>axon-aws-parent</artifactId>
+        <artifactId>axonframework-aws-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>axon-aws-guice</artifactId>
+    <artifactId>axonframework-aws-guice</artifactId>
 
     <name>Axon Framework AWS Extension - Guice</name>
     <description>Guice Dependency Injection module for the Amazon AWS Extension for Axon Framework</description>
@@ -33,7 +33,7 @@
     <dependencies>
         <dependency>
             <groupId>com.github.goldsam.axonframework.extensions.aws</groupId>
-            <artifactId>axon-aws</artifactId>
+            <artifactId>axonframework-aws</artifactId>
             <version>${project.version}</version>
         </dependency>
 

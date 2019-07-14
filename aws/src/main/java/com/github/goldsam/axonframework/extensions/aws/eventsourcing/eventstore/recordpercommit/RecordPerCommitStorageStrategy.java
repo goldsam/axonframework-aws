@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.event;
-
+package com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.recordpercommit;
+import com.amazonaws.services.kinesis.AmazonKinesis;
+import com.amazonaws.services.kinesis.model.PutRecordsRequest;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
 import com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.AbstractKinesisEventStorageStrategy;
-import com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.commit.CommitEntry;
 import com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore.KinesisEventStorageConfiguration;
-
-import org.axonframework.eventhandling.DomainEventMessage;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.eventhandling.EventUtils;
 import org.axonframework.serialization.Serializer;
@@ -34,12 +31,12 @@ import org.axonframework.serialization.Serializer;
 /**
  * PutRequestPerCommitStorageStrategy
  */
-public class PutRequestPerEventStorageStrategy extends AbstractKinesisEventStorageStrategy {
+public class RecordPerCommitStorageStrategy extends AbstractKinesisEventStorageStrategy {
 
     /**
      * Initializes a {@link PutRequestPerCommitStorageStrategy} with default configuration.
      */
-    public PutRequestPerEventStorageStrategy() {
+    public RecordPerCommitStorageStrategy() {
         super(KinesisEventStorageConfiguration.getDefault());
     }
 
@@ -48,20 +45,27 @@ public class PutRequestPerEventStorageStrategy extends AbstractKinesisEventStora
      *
      * @param storageConfiguration object that configures mapping event data to a Kinesis stream. 
      */
-    public PutRequestPerEventStorageStrategy(KinesisEventStorageConfiguration storageConfiguration) {
+    public RecordPerCommitStorageStrategy(KinesisEventStorageConfiguration storageConfiguration) {
         super(storageConfiguration);
     }
 
     @Override
-    protected Stream<PutRecordsRequestEntry> createPutRequestEntries(List<? extends EventMessage<?>> events, Serializer serializer) {
-        return events.stream()
-            .map(EventUtils::asDomainEventMessage)
-            .map(event -> {
-                return new PutRecordsRequestEntry()
-                    .withPartitionKey(eventStorageConfiguration()
-                        .partitionKeyResolver()
-                        .resolvePartitionKey(event))
-                    .withData(ByteBuffer.wrap(new EventEntry(event, serializer).asSerializedBytes()));
-            });
+    public void appendEvents(AmazonKinesis kinesisClient, List<? extends EventMessage<?>> events, Serializer serializer) {
+        kinesisClient.putRecords(new PutRecordsRequest()
+            .withStreamName(eventStorageConfiguration().kinesisStreamName())
+            .withRecords(createPutRequestEntries(events, serializer).collect(Collectors.toList())));
+    }
+    
+    private Stream<PutRecordsRequestEntry> createPutRequestEntries(List<? extends EventMessage<?>> events, Serializer serializer) {
+        EventMessage<?> lastEvent = events.get(events.size() - 1);
+        return Stream.of(new PutRecordsRequestEntry()
+                .withPartitionKey(eventStorageConfiguration()
+                    .partitionKeyResolver()
+                    .resolvePartitionKey(lastEvent))
+                .withData(ByteBuffer.wrap(
+                    new CommitEntry(
+                        events.stream().map(EventUtils::asDomainEventMessage).collect(Collectors.toList()),
+                        serializer)
+                    .asSerializedBytes())));
     }
 }

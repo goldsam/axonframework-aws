@@ -1,4 +1,4 @@
-package com.github.goldsam.axonframework.extensions.aws.lambda;
+package com.github.goldsam.axonframework.aws.lambda;
 
 import com.amazonaws.services.lambda.runtime.Context; 
 import com.amazonaws.services.lambda.runtime.RequestHandler;
