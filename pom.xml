@@ -14,19 +14,20 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
     <groupId>com.github.goldsam.axonframework.extensions.aws</groupId>
-    <artifactId>axon-aws-parent</artifactId>
+    <artifactId>axonframework-aws-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <modules>
-        <module>aws</module>
-        <module>guice</module>
-        <module>lambdas</module>
-    </modules>
+
     <packaging>pom</packaging>
 
-    <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>aws</module>
+        <module>lambdas</module>
+        <!--<module>guice</moule>-->
+    </modules>
 
     <name>Axon Framework AWS Extensions - Parent</name>
     <description>
@@ -34,7 +35,7 @@
     </description>
 
     <inceptionYear>2019</inceptionYear>
-    <url>https://github.com/goldsam/axon-aws</url>
+    <url>https://github.com/goldsam/axonframework-aws</url>
     <licenses>
         <license>
             <name>Apache 2.0</name>
@@ -43,13 +44,13 @@
     </licenses>
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/goldsam/axon-aws/issues</url>
+        <url>https://github.com/goldsam/axonframework-aws/issues</url>
     </issueManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <axon.version>4.0</axon.version>
+        <axon.version>4.1.1</axon.version>
         <amazon-kinesis-client.version>1.9.3</amazon-kinesis-client.version>
         <aws-java-sdk-dynamodb.version>1.11.523</aws-java-sdk-dynamodb.version>
         <slf4j.version>1.7.25</slf4j.version>
@@ -310,9 +311,9 @@
         </repository>
     </distributionManagement>
     <scm>
-        <connection>scm:git:git://github.com/goldsam/axon-aws.git</connection>
-        <developerConnection>scm:git:git@github.com:goldsam/axon-aws.git</developerConnection>
-        <url>https://github.com/goldsam/axon-aws</url>
+        <connection>scm:git:git://github.com/goldsam/axonframework-aws.git</connection>
+        <developerConnection>scm:git:git@github.com:goldsam/axonframework-aws.git</developerConnection>
+        <url>https://github.com/goldsam/axonframework-aws</url>
         <tag>HEAD</tag>
     </scm>
 
