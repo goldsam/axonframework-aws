@@ -18,9 +18,7 @@ package com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore
 
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import java.util.List;
-
 import com.amazonaws.services.kinesis.model.PutRecordsRequest;
-
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.serialization.Serializer;
 
@@ -32,7 +30,7 @@ import org.axonframework.serialization.Serializer;
  */
 public interface KinesisStorageStrategy {
     /**
-     * Appends the given list of {@code events} to the given {@code putRecordsRequest}. 
+     * Sends the given list of {@code events} using the given {@code kinesisClient}. 
      * Uses the given {@code serializer} to serialize the payload and metadata of the events.
      *
      * @param kinesisClient     Amazon Kinesis client.

@@ -17,16 +17,18 @@
 package com.github.goldsam.axonframework.extensions.aws.eventsourcing.eventstore;
 
 import com.github.goldsam.axonframework.extensions.aws.eventhandling.AggregateIdentifierPartitionKeyResolver;
+import com.github.goldsam.axonframework.extensions.aws.eventhandling.PackageStreamNameResolver;
 import com.github.goldsam.axonframework.extensions.aws.eventhandling.PartitionKeyResolver;
+import com.github.goldsam.axonframework.extensions.aws.eventhandling.StreamNameResolver;
 
 /**
  * Amazon Kinesis event storage configuration. 
  */
 public class KinesisEventStorageConfiguration {
 
+    private final StreamNameResolver streamNameResolver;
+    
     private final PartitionKeyResolver partitionKeyResolver;
-
-    private final String kinesisStreamName;
 
     /**
      * Returns the default {@link DynamoDbEventEntryConfiguration}.
@@ -38,8 +40,8 @@ public class KinesisEventStorageConfiguration {
     }
 
     private KinesisEventStorageConfiguration(Builder builder) {
+        streamNameResolver = builder.streamNameResolver;
         partitionKeyResolver = builder.partitionKeyResolver;
-        kinesisStreamName = builder.kinesisStreamName;
     }
 
     /**
@@ -50,7 +52,16 @@ public class KinesisEventStorageConfiguration {
     public static Builder builder() {
         return new Builder();
     }
-
+    
+    /**
+     * Gets the strategy for resolving the name of the target Kinesis Stream.
+     * 
+     * @return the strategy for resolving the name of the target Kinesis Stream.
+     */
+    public StreamNameResolver streamNameResolver() {
+        return streamNameResolver;
+    }
+    
     /**
      * Gets the strategy for resolving a Kinesis stream partition key.
      * 
@@ -60,28 +71,19 @@ public class KinesisEventStorageConfiguration {
         return partitionKeyResolver;
     }
 
-    /**
-     * Gets the name of the target Kinesis stream.
-     * 
-     * @return the name of the target Kinesis stream.
-     */
-    public String kinesisStreamName() {
-        return kinesisStreamName;
-    }
-
     public static class Builder {
+        
+        private StreamNameResolver streamNameResolver = new PackageStreamNameResolver();
 
         private PartitionKeyResolver partitionKeyResolver = new AggregateIdentifierPartitionKeyResolver();
 
-        private String kinesisStreamName = "events";
-
-        public Builder partitionKeyResolver(PartitionKeyResolver partitionKeyResolver) {
-            this.partitionKeyResolver = partitionKeyResolver;
+        public Builder partitionKeyResolver(StreamNameResolver streamNameResolver) {
+            this.streamNameResolver = streamNameResolver;
             return this;
         }
-
-        public Builder kinesisStreamName(String kinesisStreamName) {
-            this.kinesisStreamName = kinesisStreamName;
+        
+        public Builder partitionKeyResolver(PartitionKeyResolver partitionKeyResolver) {
+            this.partitionKeyResolver = partitionKeyResolver;
             return this;
         }
         

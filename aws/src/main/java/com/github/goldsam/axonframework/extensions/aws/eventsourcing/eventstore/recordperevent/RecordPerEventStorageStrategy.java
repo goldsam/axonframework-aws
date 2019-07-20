@@ -40,7 +40,6 @@ import org.axonframework.serialization.Serializer;
  * Events are published using a strategy that uses a bulk put operation for all records
  * targeting a distinct stream partitions (see 
  * <a href="https://brandur.org/kinesis-order">Guaranteeing Order with Kinesis Bulk Puts</a>).
- * 
  */
 public class RecordPerEventStorageStrategy extends AbstractKinesisEventStorageStrategy {
 
@@ -61,57 +60,61 @@ public class RecordPerEventStorageStrategy extends AbstractKinesisEventStorageSt
     }
     
     @Override
-    public void appendEvents(AmazonKinesis kinesisClient, List<? extends EventMessage<?>> events, Serializer serializer) {
+    protected void appendEvents(AmazonKinesis kinesisClient, String streamName, List<? extends EventMessage<?>> events, Serializer serializer) {
         PartitionKeyResolver partitionKeyResolver = eventStorageConfiguration().partitionKeyResolver();
         Map<String, List<EventMessage<?>>> eventGroups = events.stream()
                 .collect(Collectors.groupingBy(event -> partitionKeyResolver.resolvePartitionKey(event)));
         
         appendSequentialEventGroups(
                 kinesisClient,
+                streamName,
                 eventGroups.entrySet().stream()
                     .filter(eventPartitionKeyGroup -> eventPartitionKeyGroup.getValue().size() == 1),
                 serializer);        
         
         appendNonSequentialEventGroups(
                 kinesisClient,
+                streamName,
                 eventGroups.entrySet().stream()
                     .filter(eventPartitionKeyGroup -> eventPartitionKeyGroup.getValue().size() > 1),
                 serializer);
     }
     
-    private void appendSequentialEventGroups(AmazonKinesis kinesisClient, Stream<Map.Entry<String, List<EventMessage<?>>>> sequentialEventGroups, Serializer serializer) {
+    private void appendSequentialEventGroups(AmazonKinesis kinesisClient, String streamName, Stream<Map.Entry<String, List<EventMessage<?>>>> sequentialEventGroups, Serializer serializer) {
         sequentialEventGroups
                 .forEach(partitionKeyAndEvents -> appendSequentialEvents(
                         kinesisClient,
+                        streamName,
                         partitionKeyAndEvents.getKey(),
                         partitionKeyAndEvents.getValue(),
                         serializer));
     }
     
-    private void appendSequentialEvents(AmazonKinesis kinesisClient, String partitionKey, List<EventMessage<?>> events, Serializer serializer) {
+    private void appendSequentialEvents(AmazonKinesis kinesisClient, String streamName, String partitionKey, List<EventMessage<?>> events, Serializer serializer) {
         events.stream().reduce(
                 (String)null, 
-                (sequentNumberForOrdering, event) -> appendSequentialEvent(kinesisClient, partitionKey, event, serializer, sequentNumberForOrdering),
+                (sequentNumberForOrdering, event) -> appendSequentialEvent(kinesisClient, streamName, partitionKey, event, serializer, sequentNumberForOrdering),
                 (prevSequentNumberForOrdering, nextSequentNumberForOrdering) -> nextSequentNumberForOrdering);
     }
     
-    private String appendSequentialEvent(AmazonKinesis kinesisClient, String partitionKey, EventMessage<?> event, Serializer serializer, String sequenceNumberForOrdering) {
+    private String appendSequentialEvent(AmazonKinesis kinesisClient, String streamName, String partitionKey, EventMessage<?> event, Serializer serializer, String sequenceNumberForOrdering) {
         PutRecordRequest putRecordRequest = new PutRecordRequest()
+                .withStreamName(streamName)
                 .withPartitionKey(partitionKey)
                 .withSequenceNumberForOrdering(sequenceNumberForOrdering)
                 .withData(serializeEvent(event, serializer));
         return kinesisClient.putRecord(putRecordRequest).getSequenceNumber();
     }
     
-    private void appendNonSequentialEventGroups(AmazonKinesis kinesisClient, Stream<Map.Entry<String, List<EventMessage<?>>>> nonSequentialEventGroups, Serializer serializer) {
+    private void appendNonSequentialEventGroups(AmazonKinesis kinesisClient, String streamName, Stream<Map.Entry<String, List<EventMessage<?>>>> nonSequentialEventGroups, Serializer serializer) {
         List<PutRecordsRequestEntry> putRecordsRequestEntries = nonSequentialEventGroups
                 .map(partitionKeyAndEvent -> new PutRecordsRequestEntry()
                     .withPartitionKey(partitionKeyAndEvent.getKey())
                     .withData(serializeEvent(partitionKeyAndEvent.getValue().get(0), serializer)))
                 .collect(Collectors.toList());
         PutRecordsRequest putRecordsRequest = new PutRecordsRequest()
-                    .withRecords(putRecordsRequestEntries)
-                    .withStreamName(eventStorageConfiguration().kinesisStreamName());
+                .withStreamName(streamName)
+                .withRecords(putRecordsRequestEntries);
         PutRecordsResult putRecordsResult = kinesisClient.putRecords(putRecordsRequest);
         while (putRecordsResult.getFailedRecordCount() > 0) {
             putRecordsRequestEntries = collectFailedPutRecordsRequestEntries(

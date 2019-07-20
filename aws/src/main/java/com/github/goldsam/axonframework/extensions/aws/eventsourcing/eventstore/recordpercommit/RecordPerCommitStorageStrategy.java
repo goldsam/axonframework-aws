@@ -50,9 +50,9 @@ public class RecordPerCommitStorageStrategy extends AbstractKinesisEventStorageS
     }
 
     @Override
-    public void appendEvents(AmazonKinesis kinesisClient, List<? extends EventMessage<?>> events, Serializer serializer) {
+    protected void appendEvents(AmazonKinesis kinesisClient, String streamName, List<? extends EventMessage<?>> events, Serializer serializer) {
         kinesisClient.putRecords(new PutRecordsRequest()
-            .withStreamName(eventStorageConfiguration().kinesisStreamName())
+            .withStreamName(streamName)
             .withRecords(createPutRequestEntries(events, serializer).collect(Collectors.toList())));
     }
     
