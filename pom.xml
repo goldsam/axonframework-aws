@@ -24,8 +24,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>aws</module>
-        <module>lambdas</module>
+        <module>kinesis</module>
+        <module>dynamodb</module>
+        <module>eventstore</module>
+        <!-- <module>lambdas</module> -->
         <!--<module>guice</moule>-->
     </modules>
 
@@ -52,7 +54,9 @@
 
         <axon.version>4.1.1</axon.version>
         <amazon-kinesis-client.version>1.9.3</amazon-kinesis-client.version>
-        <aws-java-sdk-dynamodb.version>1.11.523</aws-java-sdk-dynamodb.version>
+        <aws-java-sdk-dynamodb.version>1.11.591</aws-java-sdk-dynamodb.version>
+        <aws-java-sdk-kinesis.version>1.9.5</aws-java-sdk-kinesis.version>
+        
         <slf4j.version>1.7.25</slf4j.version>
         <log4j.version>1.2.17</log4j.version>
         <mockito.version>2.15.0</mockito.version>
@@ -146,10 +150,30 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>amazon-kinesis-client</artifactId>
+                <version>${amazon-kinesis-client.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-dynamodb</artifactId>
+                <version>${aws-java-sdk-dynamodb.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>${mockito.version}</version>
+                <scope>test</scope>
             </dependency>
+            
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-kinesis</artifactId>
+                <version>${aws-java-sdk-dynamodb.version}</version>
+            </dependency>
+            
         </dependencies>
     </dependencyManagement>
 
